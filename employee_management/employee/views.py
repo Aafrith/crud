@@ -41,8 +41,10 @@ def logout_view(request):
 # Dashboard view
 @login_required
 def dashboard_view(request):
-    employees = Employee.objects.all()
+    # Filter employees to only show those associated with the logged-in user
+    employees = Employee.objects.filter(user=request.user)
     return render(request, 'dashboard.html', {'employees': employees})
+
 
 # Add employee
 @login_required
@@ -50,16 +52,24 @@ def add_employee(request):
     if request.method == 'POST':
         form = EmployeeForm(request.POST)
         if form.is_valid():
-            form.save()
+            employee = form.save(commit=False)
+            employee.user = request.user  # Associate the employee with the logged-in user
+            employee.save()
             return redirect('dashboard')
     else:
         form = EmployeeForm()
     return render(request, 'add_employee.html', {'form': form})
 
+
 # Update employee
 @login_required
 def update_employee(request, pk):
     employee = get_object_or_404(Employee, pk=pk)
+    
+    # Check if the employee belongs to the logged-in user
+    if employee.user != request.user:
+        return redirect('dashboard')  # Or show an error message
+
     if request.method == 'POST':
         form = EmployeeForm(request.POST, instance=employee)
         if form.is_valid():
@@ -73,5 +83,10 @@ def update_employee(request, pk):
 @login_required
 def delete_employee(request, pk):
     employee = get_object_or_404(Employee, pk=pk)
+
+    # Check if the employee belongs to the logged-in user
+    if employee.user != request.user:
+        return redirect('dashboard')  # Or show an error message
+
     employee.delete()
     return redirect('dashboard')

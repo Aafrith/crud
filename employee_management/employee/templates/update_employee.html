@@ -1,6 +1,12 @@
-<form method="post">
+{% extends 'base.html' %}
+
+{% block content %}
+<form method="post" class="mt-5 mx-auto w-50 p-4 border rounded bg-light">
     {% csrf_token %}
-    <h2>Update Employee</h2>
+    <h2 class="text-center mb-4">Update Employee</h2>
     {{ form.as_p }}
-    <button type="submit">Update</button>
+    <div class="d-grid">
+        <button type="submit" class="btn btn-warning">Update</button>
+    </div>
 </form>
+{% endblock %}
